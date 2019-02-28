@@ -16,15 +16,18 @@
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
 
-function GameObject(object) {
-  this.createdAt = object.createdAt;
-  this.name = object.name;
-  this.dimensions = object.dimensions;
+class GameObject {
+  constructor(object) {
+    this.createdAt = object.createdAt;
+    this.name = object.name;
+    this.dimensions = object.dimensions;
+  }
+
+  destroy () {
+    return `${this.name} was removed from the game.`
+  }
 }
 
-GameObject.prototype.destroy = function() {
-  return `${this.name} was removed from the game.`
-}
 
 /*
   === CharacterStats ===
@@ -33,17 +36,16 @@ GameObject.prototype.destroy = function() {
   * should inherit destroy() from GameObject's prototype
 */
 
-function CharacterStats(character) {
-  GameObject.call(this, character);
-  this.healthPoints = character.healthPoints;
+class CharacterStats extends GameObject {
+  constructor(character) {
+    super(character);
+    this.healthPoints = character.healthPoints;
+  }
+
+  takeDamage () {
+    return `${this.name} took damage.`;
+  }
 }
-
-CharacterStats.prototype = Object.create(GameObject.prototype);
-
-CharacterStats.prototype.takeDamage = function() {
-  return `${this.name} took damage.`;
-}
-
 
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
@@ -55,17 +57,27 @@ CharacterStats.prototype.takeDamage = function() {
   * should inherit takeDamage() from CharacterStats
 */
 
-function Humanoid(humanoid) {
-  CharacterStats.call(this, humanoid)
-  this.team = humanoid.team;
-  this.weapons = humanoid.weapons;
-  this.language = humanoid.language;
-}
+class Humanoid extends CharacterStats {
+  constructor(humanoid) {
+    super(humanoid);
+    this.team = humanoid.team;
+    this.weapons = humanoid.weapons;
+    this.language = humanoid.language;
+  }
 
-Humanoid.prototype = Object.create(CharacterStats.prototype);
+  greet () {
+    return `${this.name} offers a greeting in ${this.language}`;
+  }
 
-Humanoid.prototype.greet = function() {
-  return `${this.name} offers a greeting in ${this.language}`;
+  applyDamage(damage) {
+    this.healthPoints = this.healthPoints - damage;
+    this.takeDamage();
+    if (this.healthPoints <= 0) {
+      return this.destroy();
+    } else {
+      return "";
+    }
+  }
 }
 
 /*
@@ -75,7 +87,6 @@ Humanoid.prototype.greet = function() {
 */
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
-
 
 const mage = new Humanoid({
   createdAt: new Date(),
@@ -143,44 +154,35 @@ console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
 
-Humanoid.prototype.applyDamage = function(damage) {
-  this.healthPoints = this.healthPoints - damage;
-  this.takeDamage();
-  if (this.healthPoints <= 0) {
-    return this.destroy();
-  } else {
-    return "";
+class Villain extends Humanoid {
+  constructor(villain) {
+    super(villain);
+    this.spells = villain.spells;
+  }
+
+  cast(spellName, target) {
+    return `${this.name} casts ${spellName} at ${target.name}. ` +
+      target.applyDamage(this.spells[spellName]);
   }
 }
 
-function Villain(villain) {
-  Humanoid.call(this, villain);
-  this.spells = villain.spells;
-}
 
-Villain.prototype = Object.create(Humanoid.prototype);
-
-Villain.prototype.cast = function(spellName, target) {
-  return `${this.name} casts ${spellName} at ${target.name}. ` +
-    target.applyDamage(this.spells[spellName]);
-}
-
-function Hero(hero) {
-  Humanoid.call(this, hero);
-}
-
-Hero.prototype = Object.create(Humanoid.prototype);
-
-Hero.prototype.attack = function(target) {
-  let message = `${this.name} attacks ${target.name}.`;
-  let damage;
-  if (this.healthPoints <= 8) {
-    message += ` ${this.name}'s attack is weakened.`
-    damage = 5;
-  } else {
-    damage = 10;
+class Hero extends Humanoid {
+  constructor(hero) {
+    super(hero);
   }
-  return message + " " + target.applyDamage(damage);
+
+  attack(target) {
+    let message = `${this.name} attacks ${target.name}.`;
+    let damage;
+    if (this.healthPoints <= 8) {
+      message += ` ${this.name}'s attack is weakened.`
+      damage = 5;
+    } else {
+      damage = 10;
+    }
+    return message + " " + target.applyDamage(damage);
+  }
 }
 
 const hero = new Hero({
