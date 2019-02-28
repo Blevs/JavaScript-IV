@@ -26,6 +26,14 @@ class Instructor extends Person {
   grade(student, subject) {
     console.log(`${student.name} receives a perfect score on ${subject}`);
   }
+
+  calculateGrade(student) {
+    const old = student.grade;
+    student.grade += Math.floor((Math.random() - 0.5) * 30);
+    student.grade = Math.min(student.grade, 100);
+    student.grade = Math.max(student.grade, 0);
+    console.log(`${this.name} has changed ${student.name}'s grade from ${old} to ${student.grade}`);
+  }
 }
 
 class Student extends Person {
@@ -34,8 +42,9 @@ class Student extends Person {
     this.previousBackground = student.previousBackground;
     this.className = student.className;
     this.favSubjects = student.favSubjects;
-
+    this.grade = student.grade;
   }
+
   listsSubjects() {
     this.favSubjects.forEach(subject => console.log(subject));
   }
@@ -46,6 +55,16 @@ class Student extends Person {
 
   sprintChallenge(subject) {
     console.log(`${this.name} has begun sprint challenge on ${subject}`);
+  }
+
+  graduate() {
+    if (this.grade >= 70) {
+      console.log(`${this.name} has graduated with a grade of ${this.grade}!`)
+      return true;
+    } else {
+      console.log(`${this.name} is not yet able to graduate with a grade of ${this.gradge}.`)
+      return false;
+    }
   }
 }
 
@@ -82,6 +101,7 @@ var henry = new Student({
   previousBackground: "Physics",
   className: "web18",
   favSubjects: ['Lisp', 'Clojure', 'Functional Programming'],
+  grade: 80,
 });
 
 henry.speak();
@@ -97,6 +117,7 @@ var mike = new Student({
   previousBackground: "Farming",
   className: "web2000",
   favSubjects: ['Computers', 'Keyboards', 'Mice'],
+  grade: 40,
 });
 
 mike.speak();
@@ -170,3 +191,11 @@ ryan.demo("Tensors");
 ryan.grade(henry, "GNUPlot");
 ryan.standUp("materialscience");
 ryan.debugsCode(henry, "Something");
+
+do {
+  jacob.calculateGrade(henry);
+} while (!henry.graduate());
+
+do {
+  tj.calculateGrade(mike);
+} while (!mike.graduate());
